@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
+        :root {
+        --color-text-primary: #1c2a38;
+        --color-text-secondary: #8A8F98;
+        --color-text-alert: #d72641;
+        --color-text-icon: #dbdade;
+        --color-bg-primary: #fff;
+        --color-bg-secondary: #f3f5f9;
+        --color-bg-alert: #fdeaec;
+        --color-theme-primary: #623ce6;
+        }
+        body {
+            font-family: "Inter", sans-serif;
+            line-height: 1.5;
+            color: var(--color-text-primary);
+            background-color: var(--color-bg-secondary);
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            padding: None;
+            image-rendering: optimizeSpeed;
+        }
+    </style>
+
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="container-fluid">
+        <a class="navbar-brand" href="/">oraaacle</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Features</a>
+            </li>
+            <li class="nav-item">
+                {% if current_user.is_authenticated %}
+                    <a href="/logout" class="btn btn-warning">Logout?</a>
+                {% else %}
+                    <a class="btn btn-warning" data-bs-toggle="modal" href="#login" role="button">Login</a>
+                {% endif %}
+            </li>
+            </ul>
+            <span class="navbar-text">
+                {% if current_user.is_authenticated %}
+                    <div class="container-fluid">
+                        <img class="avatar" src="{{ current_user.icon  }}" class="rounded float-end" alt="avatar">
+                    </div>
+                {% endif %}
+            </span>
+        </div>
+        </div>
+    </nav>
+
+
+    <div class="d-grid gap-2 col-3 mx-auto">
+        <div aria-live="polite" aria-atomic="true" class="position-relative">
+            <div class="toast-container top-0 end-0 p-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header">
+                            <img src="..." class="rounded me-2" alt="...">
+                            <strong class="me-auto">oraaacle</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                          </div>
+                        <div class="d-flex"><div class="toast-body">{{ message }}</div></div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onload = (event)=> {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+            var toastList = toastElList.map(function(toastEl) {
+                return new bootstrap.Toast(toastEl) 
+            });
+            toastList.forEach(toast => toast.show());
+        }
+    </script>
+    
+
+    {% include 'authentication.html' %}
+
+    {% block main %}
+    {% endblock %}
+</body>
+</html>

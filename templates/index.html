@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+{% if current_user.is_authenticated %}
+    {% if not current_user.verified %}
+        <p>unverified account  <a href="/verify/{{ current_user.email }}">verify here</a></p>        
+    {% endif %}
+{% endif %}
+
+{% endblock %}

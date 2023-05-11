@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block main %}
+
+<form action="/verify/{{ addr }}" method="post">
+    {{ form.csrf_token }}
+    <div class="d-grid gap-2 col-3 mx-auto mt-5">
+        <div class="form-floating mb-2">
+            {{ form.email(placeholder="name@example.com",value=addr ,class_="form-control" ,readonly='readonly') }}
+            <label for="floatingInput">Email address</label>
+        </div>
+        {{ form.submit(class_="btn btn-md btn-primary") }}
+    </div>
+</form>
+
+{% endblock %}

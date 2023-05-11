@@ -1,0 +1,73 @@
+<div class="modal fade" id="login" aria-hidden="true" aria-labelledby="login" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body">
+            <form action="/login" method="post">
+                {{ form_login.csrf_token }}
+                <div class="d-grid gap-2 mx-auto">
+                    <div class="form-floating mb-2">
+                        {{ form_login.email(placeholder="name@example.com" ,class_="form-control") }}
+                        <label for="floatingInput">Email address</label>
+                    </div>
+                    <div class="form-floating">
+                        {{ form_login.password(placeholder="Password" , class_="form-control") }}
+                        <label for="floatingPassword">Password</label>
+                    </div>
+                    <div class="form-check">
+                        {{ form_login.remember(class_="form-check-input") }}
+                        <label class="form-check-label" for="flexCheckDefault"><small>Remember me?</small></label>
+                    </div>
+                    {{ form_login.recaptcha }}
+                    {{ form_login.submit(class_="btn btn-md btn-primary") }}
+                    <div class="d-grid gap-2 d-md-flex text-center">
+                        <a class="btn btn-sm btn-dark" data-bs-target="#register" data-bs-dismiss="modal" data-bs-toggle="modal">register</a>
+                        <a href="/forgot-password" class="btn btn-sm btn-dark">forgot password</a>
+                        <a href="/google-oauth-login" class="btn btn-sm btn-outline-dark"><i class="bi bi-google">google</i></a>
+                        <a href="/github-oauth-login" class="btn btn-sm btn-outline-dark"><i class="bi bi-github">github</i></a>
+                        <a href="/twitter-oauth-login" class="btn btn-sm btn-outline-dark"><i class="bi bi-twitter">tweeter</i></a>
+                    </div>
+                    <p><small>By logging in, you agree to oraaacle's Terms of Service & Privacy Policy.</small></p>
+                </div>   
+            </form>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="register" aria-hidden="true" aria-labelledby="register" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body">
+            <form action="/register" method="post">
+                {{ form_register.csrf_token }}
+                <div class="d-grid gap-2 mx-auto">
+                    <div class="form-floating">
+                        {{ form_register.email(placeholder="name@example.com" ,class_="form-control") }}
+                        <label for="floatingInput">Email address</label>
+                    </div>
+                    <div class="form-floating">
+                        {{ form_register.password(placeholder="Password" , class_="form-control") }}
+                        <label for="floatingPassword">Password</label>
+                    </div>
+                    <div class="form-floating">
+                        {{ form_register.confirm_password(placeholder="Confirm Password" , class_="form-control mb-2") }}
+                        <label for="floatingPassword">Confirm password</label>
+                    </div>
+                    {{ form_register.recaptcha }}
+                    {{ form_register.submit(class_="btn btn-md btn-primary") }}
+                    <div class="d-grid gap-2 d-md-flex text-center">
+                        <a class="btn btn-sm btn-dark" data-bs-target="#login" data-bs-dismiss="modal" data-bs-toggle="modal">login</a>
+                        <a href="/forgot-password" class="btn btn-sm btn-dark">forgot password</a>
+                        <a href="/google-oauth" class="btn btn-sm btn-outline-dark"><i class="bi bi-google">google</i></a>
+                        <a href="/github-oauth" class="btn btn-sm btn-outline-dark"><i class="bi bi-github">github</i></a>
+                        <a href="/twitter-oauth" class="btn btn-sm btn-outline-dark"><i class="bi bi-twitter">twitter</i></a>
+                    </div>
+                    <p><small>By signing up, you agree to oraaacle's Terms of Service & Privacy Policy.</small></p>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
+</div>
+
+
