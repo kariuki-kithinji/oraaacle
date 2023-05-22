@@ -1,0 +1,36 @@
+{% if cookies_check() %}
+    {# User has already consented, no need for banner #}
+{% else %}
+    {# Show a cookie consent banner using Bootstrap modal #}
+    <div class="modal fade" id="cookie-consent-modal" tabindex="-1" role="dialog" aria-labelledby="cookie-consent-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cookie-consent-modal-label">Cookie Consent</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>This website uses cookies to ensure you get the best experience on our website. By clicking "I Consent", you accept the use of cookies. To learn more about cookies and how to manage them, please see our <a href="/cookies-policy">Cookie Policy</a>.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="cookie-consent-btn">I Consent</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show the cookie consent modal automatically
+        $(document).ready(function(){
+            console.log("consent")
+        $('#cookie-consent-modal').modal('show');})
+
+        // When the user clicks "I Consent", set the cookie and hide the banner
+        $('#cookie-consent-btn').on('click', function() {
+            document.cookie = "cookie_consent=true";
+            $('#cookie-consent-modal').modal('hide');
+        });
+    </script>
+{% endif %}

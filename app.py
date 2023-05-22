@@ -1,6 +1,9 @@
-from forms import RegistrationForm , LoginForm ,ForgotPasswordForm ,ResetPasswordForm ,VerifyEmail
+from backend.forms import RegistrationForm , LoginForm ,ForgotPasswordForm ,ResetPasswordForm ,VerifyEmail
 from flask import Flask, render_template, url_for, flash, redirect, request ,make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user 
+from flask_dance.contrib.google import make_google_blueprint, google
+from flask_dance.contrib.github import make_github_blueprint, github
+
 from datetime import datetime, timedelta
 
 from flask_sqlalchemy import SQLAlchemy
@@ -18,16 +21,33 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+
 app.config['SECRET_KEY'] = secrets.token_hex(32)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
 app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
 app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
+app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS')
-app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL')
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
+
+blueprint_google = make_google_blueprint(
+    client_id=os.getenv('GOOGLE_CLIENT_ID'),
+    client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
+    #scope=["profile", "email"]
+    scope=["openid",'https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile']
+
+)
+blueprint_github = make_github_blueprint(
+    client_id=os.getenv('GITHUB_CLIENT_ID'),
+    client_secret=os.getenv('GITHUB_CLIENT_SECRET'),
+)
+
+app.register_blueprint(blueprint_google, url_prefix="/login")
+app.register_blueprint(blueprint_github, url_prefix="/login")
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -68,17 +88,42 @@ def load_user(user_id):
 def create_tables():
     db.create_all()
 
+@app.context_processor
+def inject_template_scope():
+    injections = dict()
+        
+    def cookies_check():
+        value = request.cookies.get('cookie_consent')
+        return value == 'true'
+
+    injections.update(cookies_check=cookies_check)
+    
+    return injections
+
 @app.route('/',methods=['GET', 'POST'])
 def index():
     form_login = LoginForm()
     form_register = RegistrationForm()
+
+    if google.authorized:
+        
+        resp = google.get("/user")#
+        
+        if not resp.ok:
+            flash("could not get user info from server","warning")
+        print("GOOGLE AUTHED")#You are @{login} on GOOGLE".format(login=resp.json()["login"]))
+    elif not google.authorized:
+        print("GOOGLE NOT AUTHED")
+
     return render_template('index.html',title="Home",form_login=form_login,form_register=form_register)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+
     if form.validate_on_submit():
         
         user = User(
@@ -133,6 +178,10 @@ def verify(email):
     form = VerifyEmail()
     user = User.query.filter_by(email=email).first()
 
+    if not user:
+        flash(f'No Account assiociated with the {email} address was found.', 'warning')
+        return redirect(url_for('index'))
+
     if user and user.verified:
         flash('Account has already been verified.', 'warning')
         return redirect(url_for('index'))
@@ -161,10 +210,15 @@ def verify(email):
 def verify_account(token):
     user = User.query.filter_by(verify_token=token).first()
 
-    if datetime.utcnow() > user.verify_token_expiration:
+    if not user:
         flash('This Link has expired.', 'warning')
         return redirect(url_for('login'))
+
     if user:
+        if datetime.utcnow() > user.verify_token_expiration:
+            flash('This Link has expired.', 'warning')
+            return redirect(url_for('login'))
+
         user.verified = True
         db.session.commit()
         user.verify_token = None
@@ -182,9 +236,13 @@ def verify_account(token):
 def reset_password(token):
     user = User.query.filter_by(reset_token=token).first()#_or_404()
 
-    if datetime.utcnow() > user.reset_token_expiration:
-        flash('This Link has expired.', 'warning')
+    if not user:
+        flash('This Link is invalid.', 'warning')
         return redirect(url_for('login'))
+    elif user:
+        if datetime.utcnow() > user.reset_token_expiration:
+            flash('This Link has expired.', 'warning')
+            return redirect(url_for('login'))
 
     form = ResetPasswordForm()
     if form.validate_on_submit():
